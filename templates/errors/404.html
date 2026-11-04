@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found (404){% endblock %}
+{% block page_title %}Page Not Found{% endblock %}
+{% block page_subtitle %}The requested URL does not exist on this server{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-12 col-md-6 text-center">
+        <div class="display-1 text-primary fw-bold mb-3">404</div>
+        <h3 class="fw-bold text-navy mb-2">Record or Page Not Found</h3>
+        <p class="text-muted mb-4">
+            The patient record or clinical view you are trying to access might have been deleted, moved, or never existed.
+        </p>
+        <div class="d-flex justify-content-center gap-2">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary px-4">
+                <i class="bi bi-grid-1x2-fill me-1"></i> Return to Dashboard
+            </a>
+            <a href="{{ url_for('patient_list') }}" class="btn btn-outline-secondary px-4">
+                <i class="bi bi-people me-1"></i> Patient Records
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

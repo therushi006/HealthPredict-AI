@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% block title %}Dashboard{% endblock %} - HealthPredict AI</title>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head_extra %}{% endblock %}
+</head>
+<body class="bg-light">
+
+<div class="d-flex" id="wrapper">
+    <!-- SIDEBAR -->
+    <aside class="sidebar-wrapper" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon">
+                <i class="bi bi-heart-pulse-fill"></i>
+            </div>
+            <div class="brand-text">
+                <span class="brand-title">HealthPredict</span>
+                <span class="brand-subtitle">AI Healthcare Suite</span>
+            </div>
+        </div>
+
+        <div class="sidebar-nav-container">
+            <ul class="nav flex-column sidebar-nav">
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
+                        <i class="bi bi-grid-1x2-fill"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'add_patient' %}active{% endif %}" href="{{ url_for('add_patient') }}">
+                        <i class="bi bi-person-plus-fill"></i>
+                        <span>Add Patient</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'patients' %}active{% endif %}" href="{{ url_for('patient_list') }}">
+                        <i class="bi bi-people-fill"></i>
+                        <span>Patient Records</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'analysis' %}active{% endif %}" href="{{ url_for('ai_analysis') }}">
+                        <i class="bi bi-cpu-fill"></i>
+                        <span>AI Health Analysis</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'assessment' %}active{% endif %}" href="{{ url_for('assessment_view') }}">
+                        <i class="bi bi-clipboard2-check-fill"></i>
+                        <span>Assessment Runner</span>
+                        <span class="badge bg-teal ms-auto">Official</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if active_page == 'about' %}active{% endif %}" href="{{ url_for('about') }}">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <span>About Application</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="interviewer-tag">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-building-check me-2 text-teal"></i>
+                    <div>
+                        <div class="fw-semibold text-white small">Gokul Infocare Assessment</div>
+                        <div class="text-white-50 xs-text">AI Growth & Automation</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <div class="page-content-wrapper flex-grow-1 d-flex flex-column">
+        <!-- TOP NAVIGATION BAR -->
+        <nav class="navbar navbar-expand-lg top-navbar px-4 py-3 bg-white border-bottom sticky-top">
+            <div class="container-fluid px-0">
+                <div class="d-flex align-items-center">
+                    <button class="btn btn-outline-secondary d-md-none me-3" id="sidebarToggle" type="button">
+                        <i class="bi bi-list"></i>
+                    </button>
+                    <div>
+                        <h1 class="h4 mb-0 fw-bold text-navy">{% block page_title %}Dashboard{% endblock %}</h1>
+                        <span class="text-muted small">{% block page_subtitle %}Patient Health Analytics & Management System{% endblock %}</span>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                    <div class="date-badge d-none d-sm-flex align-items-center px-3 py-1 bg-light rounded-pill border">
+                        <i class="bi bi-calendar3 me-2 text-primary"></i>
+                        <span class="small fw-medium text-secondary">{{ current_date }}</span>
+                    </div>
+                    
+                    <a href="{{ url_for('add_patient') }}" class="btn btn-primary btn-sm px-3 rounded-pill d-flex align-items-center shadow-sm">
+                        <i class="bi bi-plus-lg me-1"></i> Add Patient
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- FLASH NOTIFICATIONS -->
+        <div class="container-fluid px-4 pt-3">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm border-0 d-flex align-items-center" role="alert">
+                            {% if category == 'success' %}
+                                <i class="bi bi-check-circle-fill me-2 fs-5 text-success"></i>
+                            {% elif category == 'danger' %}
+                                <i class="bi bi-exclamation-triangle-fill me-2 fs-5 text-danger"></i>
+                            {% elif category == 'warning' %}
+                                <i class="bi bi-exclamation-circle-fill me-2 fs-5 text-warning"></i>
+                            {% else %}
+                                <i class="bi bi-info-circle-fill me-2 fs-5 text-info"></i>
+                            {% endif %}
+                            <div class="flex-grow-1">{{ message }}</div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- MAIN BODY CONTENT -->
+        <main class="container-fluid px-4 py-3 flex-grow-1">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- MANDATORY MEDICAL DISCLAIMER BANNER -->
+        <footer class="app-footer mt-auto py-3 bg-white border-top">
+            <div class="container-fluid px-4">
+                <div class="disclaimer-box p-3 rounded-3 bg-light border d-flex align-items-start">
+                    <i class="bi bi-shield-exclamation text-warning fs-4 me-3 mt-1 flex-shrink-0"></i>
+                    <div>
+                        <span class="badge bg-warning text-dark mb-1 fw-bold">Educational Health System Disclaimer</span>
+                        <p class="mb-0 text-muted small leading-relaxed">
+                            {{ medical_disclaimer }}
+                        </p>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top text-muted xs-text">
+                    <span>HealthPredict AI &bull; Technical Assessment Application &bull; Gokul Infocare</span>
+                    <span>Powered by Python 3 &bull; Flask &bull; SQLite &bull; Google Gemini API</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<!-- Bootstrap 5.3 Bundle JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Custom JavaScript -->
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Details - {{ patient.full_name }}{% endblock %}
+{% block page_title %}Patient Details & AI Report{% endblock %}
+{% block page_subtitle %}Comprehensive clinical record, blood markers, and AI-generated health interpretation{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Left Column: Patient Profile & Blood Markers -->
+    <div class="col-12 col-lg-4">
+        <!-- Patient Profile Card -->
+        <div class="card border-0 shadow-sm rounded-3 mb-4">
+            <div class="card-body p-4 text-center border-bottom bg-light">
+                <div class="patient-avatar mx-auto mb-3">
+                    <i class="bi bi-person-circle display-4 text-navy"></i>
+                </div>
+                <h4 class="fw-bold text-navy mb-1">{{ patient.full_name }}</h4>
+                <div class="badge bg-primary-subtle text-primary mb-2">Record ID #{{ patient.id }}</div>
+                <p class="text-muted small mb-0"><i class="bi bi-envelope me-1"></i>{{ patient.email }}</p>
+            </div>
+            <div class="card-body p-3 small">
+                <ul class="list-unstyled mb-0">
+                    <li class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted"><i class="bi bi-calendar3 me-1"></i> Date of Birth:</span>
+                        <strong class="text-navy">{{ patient.formatted_dob }}</strong>
+                    </li>
+                    <li class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted"><i class="bi bi-clock-history me-1"></i> Record Created:</span>
+                        <span>{{ patient.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+                    </li>
+                    <li class="d-flex justify-content-between py-2">
+                        <span class="text-muted"><i class="bi bi-pencil me-1"></i> Last Updated:</span>
+                        <span>{{ patient.updated_at.strftime('%d/%m/%Y %H:%M') }}</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-footer bg-white border-top p-3 d-flex gap-2">
+                <a href="{{ url_for('edit_patient', patient_id=patient.id) }}" class="btn btn-outline-primary btn-sm flex-grow-1">
+                    <i class="bi bi-pencil me-1"></i> Edit Details
+                </a>
+                <a href="{{ url_for('patient_list') }}" class="btn btn-light border btn-sm">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Blood Markers Breakdown Card -->
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h6 class="fw-bold text-navy mb-0 d-flex align-items-center">
+                    <i class="bi bi-droplet-fill text-danger me-2"></i> Blood Test Values
+                </h6>
+            </div>
+            <div class="card-body p-3">
+                <div class="blood-metric-item p-3 mb-2 bg-light rounded-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-semibold text-navy">Blood Glucose</div>
+                        <span class="text-muted xs-text">Reference fasting: 70–99 mg/dL</span>
+                    </div>
+                    <div class="text-end">
+                        <span class="fs-5 fw-bold {% if patient.glucose > 140 %}text-danger{% else %}text-navy{% endif %}">
+                            {{ patient.glucose }}
+                        </span>
+                        <span class="xs-text text-muted">mg/dL</span>
+                    </div>
+                </div>
+
+                <div class="blood-metric-item p-3 mb-2 bg-light rounded-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-semibold text-navy">Haemoglobin</div>
+                        <span class="text-muted xs-text">Reference: 12.0–17.5 g/dL</span>
+                    </div>
+                    <div class="text-end">
+                        <span class="fs-5 fw-bold {% if patient.haemoglobin < 11 %}text-danger{% else %}text-teal{% endif %}">
+                            {{ patient.haemoglobin }}
+                        </span>
+                        <span class="xs-text text-muted">g/dL</span>
+                    </div>
+                </div>
+
+                <div class="blood-metric-item p-3 bg-light rounded-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-semibold text-navy">Total Cholesterol</div>
+                        <span class="text-muted xs-text">Reference: &lt; 200 mg/dL</span>
+                    </div>
+                    <div class="text-end">
+                        <span class="fs-5 fw-bold {% if patient.cholesterol >= 200 %}text-danger{% else %}text-secondary{% endif %}">
+                            {{ patient.cholesterol }}
+                        </span>
+                        <span class="xs-text text-muted">mg/dL</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: AI Health Remarks Report -->
+    <div class="col-12 col-lg-8">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-cpu-fill text-teal fs-5 me-2"></i>
+                    <div>
+                        <h5 class="fw-bold text-navy mb-0">Google Gemini AI Health Remarks</h5>
+                        <span class="text-muted xs-text">Automated educational health analysis</span>
+                    </div>
+                </div>
+                <div>
+                    {% if patient.ai_status == 'completed' %}
+                    <span class="badge bg-success text-white px-3 py-2">
+                        <i class="bi bi-check-circle-fill me-1"></i> Analysis Completed
+                    </span>
+                    {% elif patient.ai_status == 'failed' %}
+                    <span class="badge bg-danger text-white px-3 py-2">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Analysis Failed
+                    </span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark px-3 py-2">
+                        <i class="bi bi-hourglass-split me-1"></i> Pending Analysis
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                {% if patient.ai_status == 'completed' and patient.ai_remarks %}
+                <div class="ai-report-content bg-light p-4 rounded-3 border">
+                    <div class="remarks-body text-secondary leading-relaxed whitespace-pre-wrap">{{ patient.ai_remarks }}</div>
+                </div>
+                {% elif patient.ai_status == 'failed' %}
+                <div class="alert alert-danger p-4 rounded-3">
+                    <h6 class="fw-bold"><i class="bi bi-exclamation-octagon-fill me-2"></i> AI Analysis Error</h6>
+                    <p class="mb-3">{{ patient.ai_remarks }}</p>
+                    <p class="small text-muted mb-3">
+                        Per assessment rules, HealthPredict AI never fabricates fake AI responses. If the API key is not configured or network fails, you can retry using the button below.
+                    </p>
+                    <form method="POST" action="{{ url_for('retry_ai', patient_id=patient.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-danger btn-sm">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Retry AI Analysis Now
+                        </button>
+                    </form>
+                </div>
+                {% else %}
+                <div class="alert alert-warning p-4 rounded-3 text-center">
+                    <i class="bi bi-clock-history fs-3 text-warning mb-2 d-block"></i>
+                    <h6 class="fw-bold">AI Analysis Pending</h6>
+                    <p class="text-muted small mb-3">This record has not completed AI interpretation.</p>
+                    <form method="POST" action="{{ url_for('retry_ai', patient_id=patient.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-warning btn-sm">
+                            <i class="bi bi-lightning-charge me-1"></i> Trigger Gemini AI Analysis
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+
+                <!-- Privacy & Architecture Notice -->
+                <div class="mt-4 p-3 bg-light rounded-3 border small text-muted">
+                    <div class="d-flex align-items-center mb-1 text-navy fw-semibold">
+                        <i class="bi bi-shield-lock-fill text-primary me-2"></i> Privacy Architecture:
+                    </div>
+                    <span>HealthPredict AI only transmits the numeric laboratory values (Glucose, Haemoglobin, Cholesterol) to Google Gemini API. Patient Personal Identifiable Information (Full Name, Date of Birth, Email) is strictly kept in SQLite and never transmitted externally.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

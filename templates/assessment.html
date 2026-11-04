@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Assessment Runner - Gokul Infocare{% endblock %}
+{% block page_title %}Gokul Infocare Assessment Suite{% endblock %}
+{% block page_subtitle %}Automated verification of the 10 official test records through live validation & AI pipeline{% endblock %}
+
+{% block content %}
+<!-- ASSESSMENT INSTRUCTIONS CARD -->
+<div class="card border-0 shadow-sm rounded-3 mb-4">
+    <div class="card-body p-4">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-teal me-2 px-2 py-1">Technical Assessment Task 2</span>
+                    <span class="badge bg-primary px-2 py-1">Official Test Data (10 Records)</span>
+                </div>
+                <h4 class="fw-bold text-navy mb-2">Official Assessment Verification Engine</h4>
+                <p class="text-secondary small mb-3 mb-lg-0 leading-relaxed">
+                    Per requirements, the application must process the 10 supplied records without altering original values. This runner sends each record through the <strong>exact same Python backend validation and Google Gemini AI pipeline</strong> as manual entry. It tracks accepted and rejected records strictly according to specification (7 accepted, 3 rejected).
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <button id="btnRunAssessment" class="btn btn-teal text-white btn-lg px-4 shadow-sm fw-semibold">
+                    <i class="bi bi-play-circle-fill me-2"></i> Run Official Assessment
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- LIVE EXECUTION RESULTS (Hidden initially, revealed on click) -->
+<div id="assessmentResultsCard" class="card border-0 shadow-sm rounded-3 mb-4 d-none">
+    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 class="fw-bold text-navy mb-0">
+            <i class="bi bi-card-checklist text-success me-2"></i> Assessment Execution Audit Log
+        </h5>
+        <div class="d-flex gap-2">
+            <span class="badge bg-primary px-3 py-2" id="metricTotal">Total: 10</span>
+            <span class="badge bg-success px-3 py-2" id="metricAccepted">Accepted: 7</span>
+            <span class="badge bg-danger px-3 py-2" id="metricRejected">Rejected: 3</span>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="resultsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4" style="width: 90px;">Record #</th>
+                        <th>Patient Name</th>
+                        <th>Assessment Result</th>
+                        <th>Validation & AI Audit Details</th>
+                        <th class="text-end pe-4">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsTableBody">
+                    <!-- Dynamic Rows Rendered by JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-light p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span class="small text-muted">All accepted records have been committed to <code>healthpredict.db</code>.</span>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('patient_list') }}" class="btn btn-primary btn-sm">
+                <i class="bi bi-people me-1"></i> View Patient Records (Operation 2)
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- OFFICIAL TEST DATA REFERENCE TABLE -->
+<div class="card border-0 shadow-sm rounded-3">
+    <div class="card-header bg-white py-3 border-bottom">
+        <h5 class="fw-bold text-navy mb-0">Supplied Official Assessment Test Dataset</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 small">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">#</th>
+                        <th>Full Name</th>
+                        <th>Date of Birth</th>
+                        <th>Email Address</th>
+                        <th>Glucose</th>
+                        <th>Hb</th>
+                        <th>Chol</th>
+                        <th>Expected Behaviour</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="ps-4 fw-bold">1</td>
+                        <td class="fw-semibold text-navy">Robyn Pears</td>
+                        <td>28.01.1960</td>
+                        <td>robyn@gmail.com</td>
+                        <td>232</td>
+                        <td>13.5</td>
+                        <td>180</td>
+                        <td><span class="badge bg-success">Accept</span> Valid clinical entry</td>
+                    </tr>
+                    <tr class="table-danger-subtle">
+                        <td class="ps-4 fw-bold">2</td>
+                        <td class="fw-semibold text-navy">John Hunter</td>
+                        <td>10.12.1990</td>
+                        <td><code>hunter@gmail</code></td>
+                        <td>94</td>
+                        <td>15</td>
+                        <td>200</td>
+                        <td><span class="badge bg-danger">Reject</span> Incomplete email syntax (missing domain TLD)</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4 fw-bold">3</td>
+                        <td class="fw-semibold text-navy">Darryl Tim</td>
+                        <td>12.11.1993</td>
+                        <td>timd@smh.com.au</td>
+                        <td>240</td>
+                        <td>18.6</td>
+                        <td>326</td>
+                        <td><span class="badge bg-success">Accept</span> Valid clinical entry</td>
+                    </tr>
+                    <tr class="table-danger-subtle">
+                        <td class="ps-4 fw-bold">4</td>
+                        <td class="fw-semibold text-navy">Peter Larry</td>
+                        <td><code>31.11.2001</code></td>
+                        <td>Larry@hotmail.com</td>
+                        <td>88</td>
+                        <td>11.5</td>
+                        <td>165</td>
+                        <td><span class="badge bg-danger">Reject</span> Invalid calendar date (November has only 30 days)</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4 fw-bold">5</td>
+                        <td class="fw-semibold text-navy">Sam Kerr</td>
+                        <td>09.12.2006</td>
+                        <td>sam@news.com.au</td>
+                        <td>198</td>
+                        <td>8.9</td>
+                        <td>192</td>
+                        <td><span class="badge bg-success">Accept</span> Valid clinical entry</td>
+                    </tr>
+                    <tr class="table-warning-subtle">
+                        <td class="ps-4 fw-bold">6</td>
+                        <td class="fw-semibold text-navy">Robyn Pears</td>
+                        <td>28.01.1960</td>
+                        <td>robyn@gmail.com</td>
+                        <td>232</td>
+                        <td>13.5</td>
+                        <td>180</td>
+                        <td><span class="badge bg-success">Accept</span> Repeat of Record 1; stored with new unique ID + duplicate warning</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4 fw-bold">7</td>
+                        <td class="fw-semibold text-navy">Madison XI</td>
+                        <td>12.09.1998</td>
+                        <td>madison@hotmail.com</td>
+                        <td>85</td>
+                        <td>7.6</td>
+                        <td>163</td>
+                        <td><span class="badge bg-success">Accept</span> Valid clinical entry</td>
+                    </tr>
+                    <tr class="table-danger-subtle">
+                        <td class="ps-4 fw-bold">8</td>
+                        <td class="fw-semibold text-navy">Kris Wu</td>
+                        <td><code>19.10.2030</code></td>
+                        <td><code>Kris.wu.gmail.com</code></td>
+                        <td>79</td>
+                        <td>16.5</td>
+                        <td>197</td>
+                        <td><span class="badge bg-danger">Reject</span> Future DOB + Invalid email missing '@'</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4 fw-bold">9</td>
+                        <td class="fw-semibold text-navy">Tenille Singh</td>
+                        <td>30.11.1991</td>
+                        <td>Tenille@yahoo.com</td>
+                        <td>101</td>
+                        <td>15</td>
+                        <td>310</td>
+                        <td><span class="badge bg-success">Accept</span> Valid clinical entry (Nov 30 is real date)</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4 fw-bold">10</td>
+                        <td class="fw-semibold text-navy">Prem Kumar</td>
+                        <td>28.04.1990</td>
+                        <td>prem@telstra.com</td>
+                        <td>155</td>
+                        <td>12.5</td>
+                        <td>265</td>
+                        <td><span class="badge bg-success">Accept</span> Valid clinical entry</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 4 ASSESSMENT OPERATIONS WALKTHROUGH -->
+<div class="card border-0 shadow-sm rounded-3 mt-4">
+    <div class="card-header bg-white py-3 border-bottom">
+        <h5 class="fw-bold text-navy mb-0">Required Assessment Operations Checklist (Section 11)</h5>
+    </div>
+    <div class="card-body p-4 small">
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <h6 class="fw-bold text-navy"><i class="bi bi-1-circle-fill text-primary me-2"></i>OPERATION 1 – CREATE</h6>
+                    <p class="text-muted mb-0">Execute all 10 supplied records. Demonstrates 7 successful database insertions and 3 precise validation rejections without altering test data.</p>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <h6 class="fw-bold text-navy"><i class="bi bi-2-circle-fill text-primary me-2"></i>OPERATION 2 – READ</h6>
+                    <p class="text-muted mb-0">Display all successfully created patient records in a professional Bootstrap table with live search, badges, and detailed view modals.</p>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <h6 class="fw-bold text-navy"><i class="bi bi-3-circle-fill text-primary me-2"></i>OPERATION 3 – UPDATE</h6>
+                    <p class="text-muted mb-0">Choose any ONE patient record, modify their email to <code>gokul@infocare.com</code>. Verifies persistent update and avoids unnecessary AI API calls.</p>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="p-3 bg-light rounded-3 border h-100">
+                    <h6 class="fw-bold text-navy"><i class="bi bi-4-circle-fill text-primary me-2"></i>OPERATION 4 – DELETE</h6>
+                    <p class="text-muted mb-0">Choose any ONE patient record, delete via POST request with confirmation modal, and verify the remaining records table in SQLite.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const btnRun = document.getElementById('btnRunAssessment');
+    const resultsCard = document.getElementById('assessmentResultsCard');
+    const tbody = document.getElementById('resultsTableBody');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    btnRun.addEventListener('click', function() {
+        btnRun.disabled = true;
+        btnRun.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Processing Pipeline...';
+
+        fetch('/assessment/run', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            btnRun.disabled = false;
+            btnRun.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i> Assessment Completed';
+            resultsCard.classList.remove('d-none');
+
+            document.getElementById('metricTotal').textContent = 'Total Processed: ' + data.total_processed;
+            document.getElementById('metricAccepted').textContent = 'Accepted: ' + data.accepted_count;
+            document.getElementById('metricRejected').textContent = 'Rejected: ' + data.rejected_count;
+
+            tbody.innerHTML = '';
+            data.results.forEach(item => {
+                const tr = document.createElement('tr');
+                if (item.status === 'ACCEPTED') {
+                    tr.className = item.warning ? 'table-warning-subtle' : 'table-success-subtle';
+                    tr.innerHTML = `
+                        <td class="ps-4 fw-bold">Record #${item.record_num}</td>
+                        <td class="fw-semibold text-navy">${item.full_name}</td>
+                        <td>
+                            <span class="badge bg-success"><i class="bi bi-check-lg me-1"></i>ACCEPTED</span>
+                            ${item.patient_id ? `<span class="badge bg-primary ms-1">ID #${item.patient_id}</span>` : ''}
+                        </td>
+                        <td class="small">
+                            ${item.warning ? `<div class="text-warning-emphasis fw-medium mb-1"><i class="bi bi-exclamation-circle me-1"></i>${item.warning}</div>` : ''}
+                            <span class="text-muted">AI Status: <strong>${item.ai_status}</strong>. Stored persistently in SQLite.</span>
+                        </td>
+                        <td class="text-end pe-4">
+                            <a href="/patients/${item.patient_id}" class="btn btn-sm btn-outline-teal">View Record</a>
+                        </td>
+                    `;
+                } else {
+                    tr.className = 'table-danger-subtle';
+                    tr.innerHTML = `
+                        <td class="ps-4 fw-bold">Record #${item.record_num}</td>
+                        <td class="fw-semibold text-navy">${item.full_name}</td>
+                        <td><span class="badge bg-danger"><i class="bi bi-x-lg me-1"></i>REJECTED</span></td>
+                        <td class="small text-danger fw-medium">
+                            <i class="bi bi-shield-x me-1"></i> ${item.reason}
+                        </td>
+                        <td class="text-end pe-4">
+                            <span class="badge bg-secondary">Blocked</span>
+                        </td>
+                    `;
+                }
+                tbody.appendChild(tr);
+            });
+
+            // Smooth scroll down to results
+            resultsCard.scrollIntoView({ behavior: 'smooth' });
+        })
+        .catch(error => {
+            console.error('Error running assessment:', error);
+            btnRun.disabled = false;
+            btnRun.innerHTML = '<i class="bi bi-play-circle-fill me-2"></i> Retry Assessment';
+            alert('An error occurred during assessment execution: ' + error.message);
+        });
+    });
+});
+</script>
+{% endblock %}

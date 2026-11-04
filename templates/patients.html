@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}Patient Records{% endblock %}
+{% block page_title %}Patient Records Management{% endblock %}
+{% block page_subtitle %}Comprehensive registry of stored patients, blood test indicators, and AI analysis{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm rounded-3">
+    <!-- Header with Search & Actions -->
+    <div class="card-header bg-white py-3 border-bottom">
+        <div class="row g-2 align-items-center">
+            <div class="col-12 col-md-4">
+                <form method="GET" action="{{ url_for('patient_list') }}" class="d-flex">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" name="q" class="form-control bg-light border-start-0" 
+                               placeholder="Search by name, email, or ID..." 
+                               value="{{ search_query }}">
+                        {% if search_query %}
+                        <a href="{{ url_for('patient_list') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                        {% endif %}
+                        <button class="btn btn-primary" type="submit">Search</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="col-12 col-md-8 text-md-end d-flex gap-2 justify-content-md-end flex-wrap">
+                <span class="badge bg-light text-dark border d-flex align-items-center px-3">
+                    Total Records: <strong class="ms-1 text-primary">{{ total_count }}</strong>
+                </span>
+                <a href="{{ url_for('assessment_view') }}" class="btn btn-outline-teal btn-sm d-flex align-items-center">
+                    <i class="bi bi-clipboard2-data me-1"></i> Assessment Runner
+                </a>
+                <a href="{{ url_for('add_patient') }}" class="btn btn-primary btn-sm d-flex align-items-center">
+                    <i class="bi bi-person-plus-fill me-1"></i> Add New Patient
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Body -->
+    <div class="card-body p-0">
+        {% if patients %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4" style="width: 70px;">ID</th>
+                        <th>Patient Details</th>
+                        <th>Contact Email</th>
+                        <th>Blood Markers</th>
+                        <th>AI Remarks Summary</th>
+                        <th>AI Status</th>
+                        <th class="text-end pe-4" style="width: 160px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in patients %}
+                    <tr>
+                        <td class="ps-4 fw-bold text-muted">#{{ patient.id }}</td>
+                        <td>
+                            <div class="fw-bold text-navy">{{ patient.full_name }}</div>
+                            <span class="text-muted xs-text"><i class="bi bi-calendar-event me-1"></i>DOB: {{ patient.formatted_dob }}</span>
+                        </td>
+                        <td>
+                            <span class="text-secondary small">{{ patient.email }}</span>
+                        </td>
+                        <td>
+                            <div class="small">
+                                <div><span class="text-muted">Glucose:</span> <strong class="text-navy">{{ patient.glucose }}</strong> <span class="xs-text text-muted">mg/dL</span></div>
+                                <div><span class="text-muted">Hb:</span> <strong class="text-teal">{{ patient.haemoglobin }}</strong> <span class="xs-text text-muted">g/dL</span></div>
+                                <div><span class="text-muted">Chol:</span> <strong class="text-secondary">{{ patient.cholesterol }}</strong> <span class="xs-text text-muted">mg/dL</span></div>
+                            </div>
+                        </td>
+                        <td style="max-width: 280px;">
+                            {% if patient.ai_remarks %}
+                            <div class="text-truncate text-secondary small" title="{{ patient.ai_remarks }}">
+                                {{ patient.ai_remarks[:100] }}...
+                            </div>
+                            <a href="{{ url_for('patient_details', patient_id=patient.id) }}" class="xs-text text-teal text-decoration-none fw-semibold">
+                                View Full Remarks <i class="bi bi-arrow-right-short"></i>
+                            </a>
+                            {% else %}
+                            <span class="text-muted fst-italic small">No remarks generated yet</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if patient.ai_status == 'completed' %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                <i class="bi bi-check-circle-fill me-1"></i> Completed
+                            </span>
+                            {% elif patient.ai_status == 'failed' %}
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle d-inline-flex align-items-center">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i> Failed
+                            </span>
+                            <form method="POST" action="{{ url_for('retry_ai', patient_id=patient.id) }}" class="d-inline ms-1">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-link btn-sm p-0 xs-text text-primary text-decoration-none" title="Retry AI Analysis">
+                                    <i class="bi bi-arrow-clockwise"></i> Retry
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
+                                <i class="bi bi-hourglass-split me-1"></i> Pending
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('patient_details', patient_id=patient.id) }}" class="btn btn-outline-secondary" title="View Patient Details">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('edit_patient', patient_id=patient.id) }}" class="btn btn-outline-primary" title="Edit Patient Record">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-danger delete-btn" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#deleteConfirmModal"
+                                        data-patient-id="{{ patient.id }}"
+                                        data-patient-name="{{ patient.full_name }}"
+                                        title="Delete Patient Record">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-5">
+            <div class="mb-3 text-muted display-4">
+                <i class="bi bi-inbox"></i>
+            </div>
+            {% if search_query %}
+            <h5 class="fw-bold text-navy">No records found matching "{{ search_query }}"</h5>
+            <p class="text-muted small mb-3">Try checking the spelling or clear the search filter.</p>
+            <a href="{{ url_for('patient_list') }}" class="btn btn-outline-primary btn-sm">Clear Search</a>
+            {% else %}
+            <h5 class="fw-bold text-navy">No Patient Records Available</h5>
+            <p class="text-muted small mb-4">You have not added any patients yet. Click below to add your first record or run the assessment test cases.</p>
+            <div class="d-flex justify-content-center gap-2">
+                <a href="{{ url_for('add_patient') }}" class="btn btn-primary btn-sm px-3">
+                    <i class="bi bi-plus-lg me-1"></i> Add Patient
+                </a>
+                <a href="{{ url_for('assessment_view') }}" class="btn btn-teal text-white btn-sm px-3">
+                    <i class="bi bi-play-circle me-1"></i> Run Assessment Data
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- DELETE CONFIRMATION MODAL -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> Confirm Patient Deletion
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="mb-2">Are you sure you want to permanently delete patient record <strong id="modalPatientName" class="text-navy"></strong> (ID: #<span id="modalPatientId"></span>)?</p>
+                <div class="alert alert-warning py-2 small mb-0">
+                    <i class="bi bi-info-circle me-1"></i> This operation will remove the patient record and its stored AI remarks permanently from SQLite.
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST" action="" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger btn-sm px-3">
+                        <i class="bi bi-trash me-1"></i> Delete Record
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteModal = document.getElementById('deleteConfirmModal');
+    if (deleteModal) {
+        deleteModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const patientId = button.getAttribute('data-patient-id');
+            const patientName = button.getAttribute('data-patient-name');
+            
+            document.getElementById('modalPatientId').textContent = patientId;
+            document.getElementById('modalPatientName').textContent = patientName;
+            
+            const deleteForm = document.getElementById('deleteForm');
+            deleteForm.action = '/patients/delete/' + patientId;
+        });
+    }
+});
+</script>
+{% endblock %}

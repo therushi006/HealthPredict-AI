@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}Executive Health Dashboard{% endblock %}
+{% block page_title %}Executive Health Dashboard{% endblock %}
+{% block page_subtitle %}Live patient blood markers, validation metrics, and AI health assessments{% endblock %}
+
+{% block content %}
+<!-- SUMMARY CARDS -->
+<div class="row g-3 mb-4">
+    <!-- Total Patients -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card metric-card shadow-sm border-0 h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="metric-icon bg-primary-subtle text-primary rounded-3 me-3">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted fw-semibold mb-1 small text-uppercase letter-spacing">Total Records</h6>
+                    <h2 class="fw-bold mb-0 text-navy">{{ total_patients }}</h2>
+                    <span class="text-muted xs-text">Stored in SQLite</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Valid Records -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card metric-card shadow-sm border-0 h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="metric-icon bg-success-subtle text-success rounded-3 me-3">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted fw-semibold mb-1 small text-uppercase letter-spacing">Valid Records</h6>
+                    <h2 class="fw-bold mb-0 text-success">{{ valid_records }}</h2>
+                    <span class="text-success xs-text"><i class="bi bi-check-all"></i> Passed all backend rules</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Completed -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card metric-card shadow-sm border-0 h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="metric-icon bg-teal-subtle text-teal rounded-3 me-3">
+                    <i class="bi bi-cpu-fill"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted fw-semibold mb-1 small text-uppercase letter-spacing">AI Analysis Completed</h6>
+                    <h2 class="fw-bold mb-0 text-teal">{{ ai_completed }}</h2>
+                    {% if ai_pending > 0 %}
+                    <span class="text-warning xs-text"><i class="bi bi-clock-history"></i> {{ ai_pending }} pending/retry</span>
+                    {% else %}
+                    <span class="text-muted xs-text"><i class="bi bi-check-circle"></i> Gemini API generated</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Validation Errors -->
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="card metric-card shadow-sm border-0 h-100">
+            <div class="card-body d-flex align-items-center">
+                <div class="metric-icon bg-danger-subtle text-danger rounded-3 me-3">
+                    <i class="bi bi-shield-x"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted fw-semibold mb-1 small text-uppercase letter-spacing">Validation Errors</h6>
+                    <h2 class="fw-bold mb-0 text-danger">{{ validation_errors_count }}</h2>
+                    <span class="text-danger xs-text">Rejected input attempts</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QUICK ACTIONS & ASSESSMENT HIGHLIGHT BANNER -->
+<div class="card border-0 shadow-sm bg-gradient-navy text-white mb-4 rounded-3 overflow-hidden">
+    <div class="card-body p-4">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-teal me-2 px-2 py-1">Gokul Infocare Technical Assessment</span>
+                    <span class="badge bg-white text-navy px-2 py-1">Task 2 Execution</span>
+                </div>
+                <h4 class="fw-bold mb-2">Ready to test the 10 official patient records?</h4>
+                <p class="text-white-50 mb-3 mb-lg-0 small">
+                    Execute the official assessment dataset using the live pipeline. All 10 records are tested strictly against backend validation and sent to Google Gemini for AI analysis.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+                    <a href="{{ url_for('assessment_view') }}" class="btn btn-teal text-white shadow-sm fw-medium">
+                        <i class="bi bi-play-circle-fill me-1"></i> Assessment Runner
+                    </a>
+                    <a href="{{ url_for('add_patient') }}" class="btn btn-outline-light">
+                        <i class="bi bi-person-plus-fill me-1"></i> Add Single Patient
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- RECENT PATIENTS TABLE -->
+<div class="card border-0 shadow-sm rounded-3">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-clock-history me-2 text-primary fs-5"></i>
+            <h5 class="fw-bold text-navy mb-0">Recently Added Patient Records</h5>
+        </div>
+        <a href="{{ url_for('patient_list') }}" class="btn btn-sm btn-outline-primary">
+            View All Records <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+    </div>
+
+    <div class="card-body p-0">
+        {% if recent_patients %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">ID</th>
+                        <th>Patient Name</th>
+                        <th>Email Address</th>
+                        <th>Blood Test Information</th>
+                        <th>AI Status</th>
+                        <th>Date Added</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in recent_patients %}
+                    <tr>
+                        <td class="ps-4 fw-semibold text-muted">#{{ patient.id }}</td>
+                        <td>
+                            <div class="fw-bold text-navy">{{ patient.full_name }}</div>
+                            <span class="text-muted xs-text">DOB: {{ patient.formatted_dob }}</span>
+                        </td>
+                        <td>
+                            <span class="text-secondary small">{{ patient.email }}</span>
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1 flex-wrap">
+                                <span class="badge bg-light text-dark border">
+                                    <strong class="text-primary">Gluc:</strong> {{ patient.glucose }}
+                                </span>
+                                <span class="badge bg-light text-dark border">
+                                    <strong class="text-teal">Hb:</strong> {{ patient.haemoglobin }}
+                                </span>
+                                <span class="badge bg-light text-dark border">
+                                    <strong class="text-secondary">Chol:</strong> {{ patient.cholesterol }}
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            {% if patient.ai_status == 'completed' %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                <i class="bi bi-check-circle-fill me-1"></i> Completed
+                            </span>
+                            {% elif patient.ai_status == 'failed' %}
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i> Failed
+                            </span>
+                            {% else %}
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
+                                <i class="bi bi-hourglass-split me-1"></i> Pending
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted small">
+                            {{ patient.created_at.strftime('%d/%m/%Y %H:%M') }}
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('patient_details', patient_id=patient.id) }}" class="btn btn-outline-secondary" title="View Full AI Report">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('edit_patient', patient_id=patient.id) }}" class="btn btn-outline-primary" title="Edit Patient">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-5">
+            <div class="mb-3 text-muted display-4">
+                <i class="bi bi-clipboard2-plus"></i>
+            </div>
+            <h5 class="fw-bold text-navy">No Patient Records Found</h5>
+            <p class="text-muted small mb-4">Start by registering your first patient or run the official assessment dataset.</p>
+            <div class="d-flex justify-content-center gap-2">
+                <a href="{{ url_for('add_patient') }}" class="btn btn-primary btn-sm px-3">
+                    <i class="bi bi-plus-lg me-1"></i> Add Patient
+                </a>
+                <a href="{{ url_for('assessment_view') }}" class="btn btn-teal text-white btn-sm px-3">
+                    <i class="bi bi-play-circle me-1"></i> Load Assessment Data
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

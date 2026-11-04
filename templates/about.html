@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}About HealthPredict AI{% endblock %}
+{% block page_title %}About HealthPredict AI{% endblock %}
+{% block page_subtitle %}Architecture, technical design decisions, and assessment specification overview{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-12 col-lg-8">
+        <!-- Overview Card -->
+        <div class="card border-0 shadow-sm rounded-3 mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="brand-icon me-3 bg-primary text-white p-2 rounded-3">
+                        <i class="bi bi-heart-pulse-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold text-navy mb-0">HealthPredict AI</h4>
+                        <span class="text-teal fw-semibold small">Patient Health Prediction & Management System</span>
+                    </div>
+                </div>
+
+                <p class="text-secondary leading-relaxed mb-4">
+                    <strong>HealthPredict AI</strong> is a full-stack Python healthcare web application built for the technical assessment for the position of <strong>AI Growth & Automation Associate at Gokul Infocare</strong>. The system provides complete CRUD management of clinical patient data, multi-layer validation, and integration with the <strong>Google Gemini API</strong> for automated, educational health interpretations of blood test markers.
+                </p>
+
+                <h5 class="fw-bold text-navy mb-3">Key System Capabilities</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border h-100">
+                            <h6 class="fw-bold text-navy"><i class="bi bi-database-check text-primary me-2"></i>Persistent SQLite Storage</h6>
+                            <p class="small text-muted mb-0">Robust persistence with SQLAlchemy ORM, parameterized queries, and automatic table creation.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border h-100">
+                            <h6 class="fw-bold text-navy"><i class="bi bi-shield-check text-success me-2"></i>Multi-Layer Validation</h6>
+                            <p class="small text-muted mb-0">Strict backend and frontend validation covering calendar date logic, future dates, email syntax, and clinical ranges.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border h-100">
+                            <h6 class="fw-bold text-navy"><i class="bi bi-cpu-fill text-teal me-2"></i>External Gemini AI Service</h6>
+                            <p class="small text-muted mb-0">Secure API integration using environment variables, privacy preservation (no PII sent), and zero fabricated responses.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded-3 border h-100">
+                            <h6 class="fw-bold text-navy"><i class="bi bi-speedometer2 text-warning me-2"></i>API Call Optimization</h6>
+                            <p class="small text-muted mb-0">During patient edits, AI analysis is only re-triggered if blood markers change, saving quota and response latency.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technology Stack Details -->
+        <div class="card border-0 shadow-sm rounded-3 mb-4">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="fw-bold text-navy mb-0">Technology Stack Breakdown</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle small mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Component</th>
+                                <th>Technology</th>
+                                <th>Role in Architecture</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="fw-bold text-navy">Backend Language</td>
+                                <td>Python 3.12</td>
+                                <td>Core runtime, data parsing, validation logic, API integration</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-navy">Web Framework</td>
+                                <td>Flask 3.0.3</td>
+                                <td>Routing, template rendering, session management, REST endpoints</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-navy">ORM & Database</td>
+                                <td>SQLAlchemy / SQLite</td>
+                                <td>Relational data persistence in <code>healthpredict.db</code> with parameterized queries</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-navy">AI Integration</td>
+                                <td>Google Gemini API</td>
+                                <td>Generative educational interpretation of blood markers via <code>ai_service.py</code></td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-navy">Frontend UI</td>
+                                <td>Bootstrap 5.3 + Vanilla JS</td>
+                                <td>Responsive medical dashboard, client validation, modal dialogs</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold text-navy">Testing Framework</td>
+                                <td>pytest 8.2</td>
+                                <td>Automated unit and integration test suite with mocked AI calls</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Candidate & Assessment Details -->
+    <div class="col-12 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-3 mb-4">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h6 class="fw-bold text-navy mb-0">Assessment Details</h6>
+            </div>
+            <div class="card-body p-3 small">
+                <ul class="list-unstyled mb-0">
+                    <li class="py-2 border-bottom">
+                        <span class="text-muted d-block">Company:</span>
+                        <strong class="text-navy">Gokul Infocare</strong>
+                    </li>
+                    <li class="py-2 border-bottom">
+                        <span class="text-muted d-block">Role:</span>
+                        <strong class="text-navy">AI Growth & Automation Associate</strong>
+                    </li>
+                    <li class="py-2 border-bottom">
+                        <span class="text-muted d-block">Assignment:</span>
+                        <strong class="text-navy">Task 2 - Patient Health Prediction & Management</strong>
+                    </li>
+                    <li class="py-2">
+                        <span class="text-muted d-block">Assessment Result:</span>
+                        <span class="badge bg-success">10 Records &bull; 7 Accepted &bull; 3 Rejected</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-3 bg-light border">
+            <div class="card-body p-3 small">
+                <h6 class="fw-bold text-navy mb-2"><i class="bi bi-shield-fill-exclamation text-warning me-1"></i> Medical Disclaimer Policy</h6>
+                <p class="text-muted mb-0">
+                    HealthPredict AI is an educational assessment system and explicitly does not claim clinical diagnosis or prescribe treatments. All AI outputs carry clear informational notices advising consultation with registered healthcare professionals.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

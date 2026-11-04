@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Add New Patient{% endblock %}
+{% block page_title %}Patient Registration Form{% endblock %}
+{% block page_subtitle %}Register patient details and trigger automated AI blood marker analysis{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Main Form Column -->
+    <div class="col-12 col-lg-8">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-white py-3 border-bottom">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-person-plus-fill me-2 text-primary fs-5"></i>
+                    <h5 class="fw-bold text-navy mb-0">Patient Clinical Entry Form</h5>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <form id="patientForm" method="POST" action="{{ url_for('add_patient') }}" novalidate>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <!-- Full Name -->
+                    <div class="mb-3">
+                        <label for="full_name" class="form-label fw-semibold">
+                            Full Name <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                            <input type="text" 
+                                   class="form-control {% if errors.get('full_name') %}is-invalid{% endif %}" 
+                                   id="full_name" 
+                                   name="full_name" 
+                                   value="{{ form_data.get('full_name', '') }}" 
+                                   placeholder="e.g. Robyn Pears" 
+                                   required>
+                            {% if errors.get('full_name') %}
+                            <div class="invalid-feedback d-block">{{ errors['full_name'] }}</div>
+                            {% else %}
+                            <div class="invalid-feedback" id="full_name_feedback"></div>
+                            {% endif %}
+                        </div>
+                        <div class="form-text xs-text text-muted">Legal patient full name. Trimmed automatically.</div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <!-- Date of Birth -->
+                        <div class="col-12 col-md-6">
+                            <label for="date_of_birth" class="form-label fw-semibold">
+                                Date of Birth <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group has-validation">
+                                <span class="input-group-text bg-light"><i class="bi bi-calendar3"></i></span>
+                                <input type="text" 
+                                       class="form-control {% if errors.get('date_of_birth') %}is-invalid{% endif %}" 
+                                       id="date_of_birth" 
+                                       name="date_of_birth" 
+                                       value="{{ form_data.get('date_of_birth', '') }}" 
+                                       placeholder="DD/MM/YYYY or DD.MM.YYYY" 
+                                       required>
+                                {% if errors.get('date_of_birth') %}
+                                <div class="invalid-feedback d-block">{{ errors['date_of_birth'] }}</div>
+                                {% else %}
+                                <div class="invalid-feedback" id="dob_feedback"></div>
+                                {% endif %}
+                            </div>
+                            <div class="form-text xs-text text-muted">Accepts DD/MM/YYYY or dotted dates (e.g. 28.01.1960). Must not be future date.</div>
+                        </div>
+
+                        <!-- Email Address -->
+                        <div class="col-12 col-md-6">
+                            <label for="email" class="form-label fw-semibold">
+                                Email Address <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group has-validation">
+                                <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                                <input type="email" 
+                                       class="form-control {% if errors.get('email') %}is-invalid{% endif %}" 
+                                       id="email" 
+                                       name="email" 
+                                       value="{{ form_data.get('email', '') }}" 
+                                       placeholder="e.g. robyn@gmail.com" 
+                                       required>
+                                {% if errors.get('email') %}
+                                <div class="invalid-feedback d-block">{{ errors['email'] }}</div>
+                                {% else %}
+                                <div class="invalid-feedback" id="email_feedback"></div>
+                                {% endif %}
+                            </div>
+                            <div class="form-text xs-text text-muted">Must include '@' and valid domain with TLD (e.g. user@domain.com).</div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 mb-4 border">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-droplet-half text-danger me-2"></i>
+                            <h6 class="fw-bold text-navy mb-0">Laboratory Blood Test Markers</h6>
+                            <span class="badge bg-secondary-subtle text-secondary ms-2 xs-text">Mandatory Numeric Values</span>
+                        </div>
+
+                        <div class="row g-3">
+                            <!-- Glucose -->
+                            <div class="col-12 col-md-4">
+                                <label for="glucose" class="form-label fw-semibold small">
+                                    Glucose (mg/dL) <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" step="0.1" 
+                                       class="form-control {% if errors.get('glucose') %}is-invalid{% endif %}" 
+                                       id="glucose" 
+                                       name="glucose" 
+                                       value="{{ form_data.get('glucose', '') }}" 
+                                       placeholder="e.g. 232" 
+                                       required>
+                                {% if errors.get('glucose') %}
+                                <div class="invalid-feedback d-block">{{ errors['glucose'] }}</div>
+                                {% else %}
+                                <div class="invalid-feedback" id="glucose_feedback"></div>
+                                {% endif %}
+                                <div class="form-text xs-text text-muted">Normal fasting: 70–99</div>
+                            </div>
+
+                            <!-- Haemoglobin -->
+                            <div class="col-12 col-md-4">
+                                <label for="haemoglobin" class="form-label fw-semibold small">
+                                    Haemoglobin (g/dL) <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" step="0.1" 
+                                       class="form-control {% if errors.get('haemoglobin') %}is-invalid{% endif %}" 
+                                       id="haemoglobin" 
+                                       name="haemoglobin" 
+                                       value="{{ form_data.get('haemoglobin', '') }}" 
+                                       placeholder="e.g. 13.5" 
+                                       required>
+                                {% if errors.get('haemoglobin') %}
+                                <div class="invalid-feedback d-block">{{ errors['haemoglobin'] }}</div>
+                                {% else %}
+                                <div class="invalid-feedback" id="haemoglobin_feedback"></div>
+                                {% endif %}
+                                <div class="form-text xs-text text-muted">Normal: 12.0–17.5</div>
+                            </div>
+
+                            <!-- Cholesterol -->
+                            <div class="col-12 col-md-4">
+                                <label for="cholesterol" class="form-label fw-semibold small">
+                                    Cholesterol (mg/dL) <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" step="0.1" 
+                                       class="form-control {% if errors.get('cholesterol') %}is-invalid{% endif %}" 
+                                       id="cholesterol" 
+                                       name="cholesterol" 
+                                       value="{{ form_data.get('cholesterol', '') }}" 
+                                       placeholder="e.g. 180" 
+                                       required>
+                                {% if errors.get('cholesterol') %}
+                                <div class="invalid-feedback d-block">{{ errors['cholesterol'] }}</div>
+                                {% else %}
+                                <div class="invalid-feedback" id="cholesterol_feedback"></div>
+                                {% endif %}
+                                <div class="form-text xs-text text-muted">Desirable: &lt; 200</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Processing Notice -->
+                    <div class="alert alert-info py-2 small mb-4 d-flex align-items-center">
+                        <i class="bi bi-cpu text-teal fs-5 me-2 flex-shrink-0"></i>
+                        <div>
+                            <strong>Automated AI Integration:</strong> Upon submission, blood test values are sent to Google Gemini API to generate structured health remarks. Manual remarks input is strictly prohibited to maintain diagnostic traceability.
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                        <a href="{{ url_for('patient_list') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-lg me-1"></i> Cancel
+                        </a>
+                        <div class="d-flex gap-2">
+                            <button type="reset" class="btn btn-light border" id="btnReset">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Form
+                            </button>
+                            <button type="submit" class="btn btn-primary px-4 shadow-sm" id="btnSubmit">
+                                <i class="bi bi-check-lg me-1"></i> Validate & Save Record
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Validation Reference & Official Test Set -->
+    <div class="col-12 col-lg-4">
+        <!-- Validation Guide Card -->
+        <div class="card border-0 shadow-sm rounded-3 mb-4">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h6 class="fw-bold text-navy mb-0 d-flex align-items-center">
+                    <i class="bi bi-shield-check text-success me-2"></i> Clinical & Syntax Rules
+                </h6>
+            </div>
+            <div class="card-body small">
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2 pb-2 border-bottom">
+                        <strong><i class="bi bi-person text-primary me-1"></i> Full Name:</strong>
+                        <div class="text-muted">Required, trimmed, 2–100 characters.</div>
+                    </li>
+                    <li class="mb-2 pb-2 border-bottom">
+                        <strong><i class="bi bi-calendar-check text-primary me-1"></i> Date of Birth:</strong>
+                        <div class="text-muted">Accepts DD.MM.YYYY, DD/MM/YYYY. Validates real calendar date (rejects 31 Nov) and rejects future dates.</div>
+                    </li>
+                    <li class="mb-2 pb-2 border-bottom">
+                        <strong><i class="bi bi-envelope-at text-primary me-1"></i> Email Syntax:</strong>
+                        <div class="text-muted">Strict validation requiring <code>user@domain.tld</code>. Rejects incomplete domains like <code>hunter@gmail</code>.</div>
+                    </li>
+                    <li>
+                        <strong><i class="bi bi-activity text-danger me-1"></i> Blood Ranges:</strong>
+                        <div class="text-muted">
+                            Glucose: 20–600 mg/dL<br>
+                            Hb: 2.0–25.0 g/dL<br>
+                            Cholesterol: 50–600 mg/dL
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Official Assessment Shortcuts -->
+        <div class="card border-0 shadow-sm rounded-3 bg-light border">
+            <div class="card-body">
+                <h6 class="fw-bold text-navy mb-2 d-flex align-items-center">
+                    <i class="bi bi-clipboard2-pulse text-teal me-2"></i> Official Assessment Dataset
+                </h6>
+                <p class="text-muted xs-text mb-3">
+                    Need to test all 10 Gokul Infocare records quickly? Use the automated Assessment Runner to execute each test record through this exact validation pipeline.
+                </p>
+                <a href="{{ url_for('assessment_view') }}" class="btn btn-teal text-white btn-sm w-100">
+                    <i class="bi bi-lightning-charge me-1"></i> Launch Assessment Runner
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

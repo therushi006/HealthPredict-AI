@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}AI Health Analysis{% endblock %}
+{% block page_title %}AI Health Analysis Hub{% endblock %}
+{% block page_subtitle %}Automated blood marker evaluation powered by Google Gemini API{% endblock %}
+
+{% block content %}
+<!-- AI Status Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body d-flex align-items-center">
+                <div class="metric-icon bg-success-subtle text-success rounded-3 me-3">
+                    <i class="bi bi-check2-circle"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted small text-uppercase fw-semibold mb-1">Completed Analyses</h6>
+                    <h3 class="fw-bold text-success mb-0">{{ completed_count }}</h3>
+                    <span class="text-muted xs-text">Successfully processed</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body d-flex align-items-center">
+                <div class="metric-icon bg-danger-subtle text-danger rounded-3 me-3">
+                    <i class="bi bi-exclamation-octagon"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted small text-uppercase fw-semibold mb-1">Failed Analyses</h6>
+                    <h3 class="fw-bold text-danger mb-0">{{ failed_count }}</h3>
+                    <span class="text-danger xs-text">API key missing or network error</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-body d-flex align-items-center">
+                <div class="metric-icon bg-warning-subtle text-warning rounded-3 me-3">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+                <div>
+                    <h6 class="text-muted small text-uppercase fw-semibold mb-1">Pending Analyses</h6>
+                    <h3 class="fw-bold text-warning mb-0">{{ pending_count }}</h3>
+                    <span class="text-muted xs-text">Awaiting execution</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AI Integration Architecture Card -->
+<div class="card border-0 shadow-sm rounded-3 mb-4">
+    <div class="card-header bg-white py-3 border-bottom">
+        <h5 class="fw-bold text-navy mb-0 d-flex align-items-center">
+            <i class="bi bi-diagram-3-fill text-teal me-2"></i> Structured AI Assessment Protocol
+        </h5>
+    </div>
+    <div class="card-body p-4">
+        <div class="row g-4">
+            <div class="col-12 col-md-6 border-end-md">
+                <h6 class="fw-bold text-navy mb-2"><i class="bi bi-chat-left-quote text-primary me-2"></i>AI Prompt Directive</h6>
+                <div class="p-3 bg-light rounded-3 small font-monospace text-secondary leading-relaxed border">
+                    "You are an educational health information assistant. Review the supplied patient blood test values and provide a cautious, general informational interpretation... Provide: A brief summary of the supplied values; Any possible health risk indicators that may warrant further attention; A recommendation to consult a qualified healthcare professional; A note explaining that interpretation depends on units, reference ranges, fasting status, age, and other clinical information..."
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <h6 class="fw-bold text-navy mb-2"><i class="bi bi-check2-square text-success me-2"></i>Expected Response Format</h6>
+                <div class="list-group list-group-flush small">
+                    <div class="list-group-item px-0 d-flex align-items-center">
+                        <span class="badge bg-primary me-2">1</span>
+                        <div><strong>General Assessment:</strong> Summary of blood test values</div>
+                    </div>
+                    <div class="list-group-item px-0 d-flex align-items-center">
+                        <span class="badge bg-danger me-2">2</span>
+                        <div><strong>Potential Risk Indicators:</strong> Cautious flags based on clinical ranges</div>
+                    </div>
+                    <div class="list-group-item px-0 d-flex align-items-center">
+                        <span class="badge bg-teal me-2">3</span>
+                        <div><strong>Recommendation:</strong> Professional consultation reminder</div>
+                    </div>
+                    <div class="list-group-item px-0 d-flex align-items-center">
+                        <span class="badge bg-warning text-dark me-2">4</span>
+                        <div><strong>Medical Disclaimer:</strong> Inherent limitation of educational AI interpretation</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Patients AI Status Table -->
+<div class="card border-0 shadow-sm rounded-3">
+    <div class="card-header bg-white py-3 border-bottom">
+        <h5 class="fw-bold text-navy mb-0">Patient AI Status Registry</h5>
+    </div>
+    <div class="card-body p-0">
+        {% if patients %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Patient</th>
+                        <th>Glucose (mg/dL)</th>
+                        <th>Haemoglobin (g/dL)</th>
+                        <th>Cholesterol (mg/dL)</th>
+                        <th>AI Status</th>
+                        <th>Remarks Preview</th>
+                        <th class="text-end pe-4">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in patients %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-bold text-navy">{{ p.full_name }}</div>
+                            <span class="text-muted xs-text">Record #{{ p.id }}</span>
+                        </td>
+                        <td>{{ p.glucose }}</td>
+                        <td>{{ p.haemoglobin }}</td>
+                        <td>{{ p.cholesterol }}</td>
+                        <td>
+                            {% if p.ai_status == 'completed' %}
+                            <span class="badge bg-success-subtle text-success border border-success-subtle">Completed</span>
+                            {% elif p.ai_status == 'failed' %}
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Failed</span>
+                            {% else %}
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td style="max-width: 250px;">
+                            <div class="text-truncate small text-muted">
+                                {{ p.ai_remarks or 'None' }}
+                            </div>
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{{ url_for('patient_details', patient_id=p.id) }}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                {% if p.ai_status != 'completed' %}
+                                <form method="POST" action="{{ url_for('retry_ai', patient_id=p.id) }}" class="d-inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-outline-primary" title="Retry Analysis">
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5 text-muted">
+            <p>No patient records available yet.</p>
+            <a href="{{ url_for('add_patient') }}" class="btn btn-primary btn-sm">Add Patient</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
